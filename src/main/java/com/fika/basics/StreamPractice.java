@@ -33,5 +33,29 @@ public class StreamPractice {
         Optional<Product> priciest = products.stream()
                 .max(Comparator.comparing(Product::price));
         priciest.ifPresent(p -> System.out.println("Priciest: " + p.name()));
+
+        Map<String, BigDecimal> valueByCategory = products.stream()
+                .collect(Collectors.groupingBy(Product::category,
+                        Collectors.reducing(BigDecimal.ZERO,
+                                p -> p.price().multiply(BigDecimal.valueOf(p.stock())),
+                                BigDecimal::add)));
+        System.out.println(valueByCategory);
+
+        String outOfStock = products.stream()
+                .filter(product -> product.stock() == 0)
+                .map(Product::name)
+                .collect(Collectors.joining(", "));
+        System.out.println("Out of stock: "+ outOfStock);
+
+
+        products.forEach(product -> System.out.println(product.name+": "+stockLabel(product.stock())));
+    }
+
+    static String stockLabel(Integer stock){
+        return  switch (stock){
+            case Integer s when s < 10 -> "LOW";
+            case Integer s when s < 50 -> "OK";
+            case Integer s -> "HIGH";
+        };
     }
 }
